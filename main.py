@@ -11,8 +11,7 @@ def main():
   if not os.path.exists("cache"):
     os.makedirs("cache")
   
-  playing = vlc.Instance() # the process that is currently playing music
-  playing.media_player_new()
+  playing = vlc.Instance().media_player_new() # the process that is currently playing music
 
   while True: # main loop
 
