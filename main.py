@@ -1,5 +1,6 @@
 import os
 import multiprocessing
+import urllib.request
 from pytube import YouTube
 from playsound import playsound
 
@@ -12,16 +13,20 @@ def main():
 
   while True: # main loop
 
-    request = input("YouTube URL or ID: ") # user input
-    if request == "":
-      request = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" # for testing
+    tagid = input("NFC Tag ID: ") # user input
+    
+    correspondingid = urllib.request.urlopen("https://script.google.com/macros/s/AKfycbw9KcSfkivP_ZJG53Ix-2fr-Vkk63KZK7Wfsj10hkNvAOu2XddJy8xjVJSOO4HZKqk3/exec?id=" + tagid).read().decode("utf-8")
 
     try:
-      yt = YouTube(request) # try to get the video
+      yt = YouTube(correspondingid) # try to get the video
     except:
-      request = "https://www.youtube.com/watch?v=" + request # if it's not a URL
-      yt = YouTube(request) # try to get the video with the ID
-    
+      correspondingid = "https://www.youtube.com/watch?v=" + correspondingid # if it's not a URL
+      try:
+        yt = YouTube(correspondingid) # try to get the video with the ID
+      except:
+        print("No ID found")
+        continue
+      
     print("Downloading...")
     downloadpath = yt.streams.filter(only_audio=True).order_by("abr").desc().first().download("cache") # highest quality audio
     print("Downloaded!")
