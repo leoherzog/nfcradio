@@ -42,7 +42,7 @@ def main():
         playing.terminate() # stop the current process
       
       print("Playing...")
-      playing = multiprocessing.Process(target=playsound, args=(downloadpath,)) # create a new process
+      playing = multiprocessing.Popen(['omxplayer', downloadpath]) # create a new process
       playing.start() # and start it
 
     except KeyboardInterrupt:
@@ -52,7 +52,7 @@ def main():
       break
 
     except Exception as e:
-      print("Error:" + e)
+      print("Error:" + str(e))
       continue
 
 if __name__ == '__main__':
