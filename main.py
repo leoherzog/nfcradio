@@ -1,10 +1,9 @@
 #/usr/bin/python3
 
 import os
-import multiprocessing
+import subprocess
 import urllib.request
 from pytube import YouTube
-from playsound import playsound
 
 def main():
 
@@ -42,7 +41,7 @@ def main():
         playing.terminate() # stop the current process
       
       print("Playing...")
-      playing = multiprocessing.Popen(['omxplayer', downloadpath]) # create a new process
+      playing = subprocess.Popen(['omxplayer', downloadpath]) # create a new process
       playing.start() # and start it
 
     except KeyboardInterrupt:
