@@ -4,13 +4,15 @@ import os
 import subprocess
 import urllib.request
 from pytube import YouTube
+import vlc
 
 def main():
 
   if not os.path.exists("cache"):
     os.makedirs("cache")
   
-  playing = None # the process that is currently playing music
+  playing = vlc.Instance() # the process that is currently playing music
+  playing.media_player_new()
 
   while True: # main loop
 
@@ -31,27 +33,25 @@ def main():
         except:
           print("No ID found")
           continue
+
+      playing.stop()
         
       print("Downloading...")
       downloadpath = yt.streams.filter(only_audio=True).order_by("abr").desc().first().download("cache") # highest quality audio
       print("Downloaded!")
-
-      if playing is not None:
-        print("Stopping...")
-        playing.terminate() # stop the current process
       
       print("Playing...")
-      playing = subprocess.Popen(['omxplayer', downloadpath]) # create a new process
-      playing.start() # and start it
+      playing.set_media(downloadpath)
+      playing.play() # and start it
 
     except KeyboardInterrupt:
       print("Stopping...")
-      if playing is not None:
-        playing.terminate()
+      playing.stop()
       break
 
     except Exception as e:
       print("Error:" + str(e))
+      playing.stop()
       continue
 
 if __name__ == '__main__':
