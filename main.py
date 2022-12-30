@@ -32,8 +32,10 @@ def main():
     print("Downloaded!")
 
     if playing is not None:
+      print("Stopping...")
       playing.terminate() # stop the current process
-
+    
+    print("Playing...")
     playing = multiprocessing.Process(target=playsound, args=(downloadpath,)) # create a new process
     playing.start() # and start it
 
