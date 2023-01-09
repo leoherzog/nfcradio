@@ -1,57 +1,76 @@
 #/usr/bin/python3
 
-import os
-import subprocess
+# https://github.com/home-assistant-libs/pychromecast/blob/master/examples/youtube_example.py
+
 import urllib.request
-from pytube import YouTube
-import vlc
+import pychromecast
+from pychromecast.controllers.youtube import YouTubeController
+
+destination = "Kitchen"
+chromecasts = None
+browser = None
 
 def main():
 
-  if not os.path.exists("cache"):
-    os.makedirs("cache")
+  chromecasts, browser = pychromecast.get_listed_chromecasts(friendly_names=[destination])
   
-  playing = vlc.Instance().media_player_new() # the process that is currently playing music
-
   while True: # main loop
+
+    if not chromecasts:
+      print("No Chromecast with that name found")
+      restartDiscovery()
+      continue
+
+    try:
+      cast = chromecasts[0]
+      cast.wait()
+      yt = YouTubeController()
+      cast.register_handler(yt)
+    except:
+      print("No Chromecast with that name found")
+      restartDiscovery()
+      continue
 
     try:
 
       tagid = input("NFC Tag ID: ") # user input
       if tagid == "": # if the user just presses enter
         tagid = "00BAF91F04" # for testing
+
+      print(cast.status)
+
+      yt.clear_playlist()
       
       correspondingid = urllib.request.urlopen("https://script.google.com/macros/s/AKfycbw9KcSfkivP_ZJG53Ix-2fr-Vkk63KZK7Wfsj10hkNvAOu2XddJy8xjVJSOO4HZKqk3/exec?id=" + tagid).read().decode("utf-8")
+      correspondingid = correspondingid.replace("https://youtu.be/", "").replace("https://www.youtube.com/watch?v=", "").replace("https://music.youtube.com/watch?v=", "")
 
       try:
-        yt = YouTube(correspondingid) # try to get the video
+        yt.play_video(correspondingid)
       except:
-        correspondingid = "https://www.youtube.com/watch?v=" + correspondingid # if it's not a URL
-        try:
-          yt = YouTube(correspondingid) # try to get the video with the ID
-        except:
-          print("No ID found")
-          continue
+        print("Problem playing video")
+        continue
 
-      playing.stop()
-        
-      print("Downloading...")
-      downloadpath = yt.streams.filter(only_audio=True).order_by("abr").desc().first().download("cache") # highest quality audio
-      print("Downloaded!")
-      
-      print("Playing...")
-      playing.set_media(downloadpath)
-      playing.play() # and start it
+      if cast.volume_level <= 30:
+        try:
+          yt.set_volume(0.3)
+        except:
+          print("Problem setting volume")
 
     except KeyboardInterrupt:
       print("Stopping...")
-      playing.stop()
+      chromecasts[0].quit_app()
+      browser.stop_discovery()
       break
 
-    except Exception as e:
-      print("Error:" + str(e))
-      playing.stop()
+    except:
+      print("Error")
+      chromecasts[0].quit_app()
+      browser.stop_discovery()
       continue
+
+def restartDiscovery():
+  pychromecast.discovery.stop_discovery(browser)
+  chromecasts, browser = pychromecast.get_listed_chromecasts(friendly_names=[destination])
 
 if __name__ == '__main__':
   main()
