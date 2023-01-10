@@ -2,6 +2,7 @@
 
 # https://github.com/home-assistant-libs/pychromecast/blob/master/examples/youtube_example.py
 
+import time
 import urllib.request
 import pychromecast
 from pychromecast.controllers.youtube import YouTubeController
@@ -18,6 +19,7 @@ def main():
 
     if not chromecasts:
       print("No Chromecast with that name found")
+      time.sleep(10)
       restartDiscovery()
       continue
 
