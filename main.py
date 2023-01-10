@@ -6,7 +6,7 @@ import urllib.request
 import pychromecast
 from pychromecast.controllers.youtube import YouTubeController
 
-destination = "Kitchen"
+destination = "Office"
 chromecasts = None
 browser = None
 
@@ -50,9 +50,9 @@ def main():
         print("Problem playing video")
         continue
 
-      if cast.volume_level <= 30:
+      if cast.status.volume_level <= .3:
         try:
-          yt.set_volume(0.3)
+          cast.set_volume(.3)
         except:
           print("Problem setting volume")
 
